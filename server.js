@@ -3,6 +3,7 @@ const app = express();
 const cors = require('cors');
 const bodyParser = require('body-parser');
 var usersList = [];
+var usersExerciseLog = {};
 
 require('dotenv').config();
 
@@ -26,6 +27,7 @@ app.get('/api/users', function (req, res) {
   res.json(usersResponse);
 });
 
+
 app.post('/api/users', function (req, res) {
   if (!usersList.includes(req.body.username)) {
     usersList.push(req.body.username);
@@ -33,6 +35,24 @@ app.post('/api/users', function (req, res) {
   
   res.json({username: req.body.username, _id: usersList.indexOf(req.body.username)});
 
+});
+
+app.post('/api/users/:_id/exercises', function (req, res) {
+  let exDate = "";
+
+  if (req.body.date === '' || req.body.date === undefined) {
+    exDate = new Date().toDateString();
+  } else {
+    exDate = new Date(req.body.date).toDateString();
+  }
+
+  if (req.body._id in usersExerciseLog) {
+    usersExerciseLog[req.params._id].push({date: exDate, duration: parseInt(req.body.duration), description: req.body.description});
+  } else {
+    usersExerciseLog[req.params._id] = [{date: exDate, duration: parseInt(req.body.duration), description: req.body.description}];
+  }
+
+  res.json({username: usersList[req.params._id], _id: parseInt(req.params._id), date: exDate, duration: parseInt(req.body.duration), description: req.body.description});
 });
 
 
