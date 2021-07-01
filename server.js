@@ -15,6 +15,16 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html');
 });
 
+app.get('/api/users', function (req, res) {
+  let usersResponse = [];
+
+  for (var [_id, username] of usersList.entries()) {
+    _id = _id.toString();
+    usersResponse.push({username, _id});
+  }
+  
+  res.json(usersResponse);
+});
 
 app.post('/api/users', function (req, res) {
   if (!usersList.includes(req.body.username)) {
