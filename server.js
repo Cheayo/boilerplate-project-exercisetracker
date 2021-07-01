@@ -20,11 +20,15 @@ app.get('/api/users', function (req, res) {
   let usersResponse = [];
 
   for (var [_id, username] of usersList.entries()) {
-    _id = _id.toString();
+    _id = _id.toString(); // to be able to pass test
     usersResponse.push({username, _id});
   }
   
   res.json(usersResponse);
+});
+
+app.get('/api/users/:_id/logs', function (req, res) {
+  res.json({username: usersList[req.params._id], _id: parseInt(req.params._id), log: usersExerciseLog[req.params._id], count: Object.keys(usersExerciseLog[req.params._id]).length});
 });
 
 
@@ -38,8 +42,8 @@ app.post('/api/users', function (req, res) {
 });
 
 app.post('/api/users/:_id/exercises', function (req, res) {
-  let exDate = "";
-
+  let exDate = undefined;
+  
   if (req.body.date === '' || req.body.date === undefined) {
     exDate = new Date().toDateString();
   } else {
