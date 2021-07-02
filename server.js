@@ -28,7 +28,20 @@ app.get('/api/users', function (req, res) {
 });
 
 app.get('/api/users/:_id/logs', function (req, res) {
-  res.json({username: usersList[req.params._id], _id: parseInt(req.params._id), log: usersExerciseLog[req.params._id], count: Object.keys(usersExerciseLog[req.params._id]).length});
+  let logsLimit = req.query.limit ? req.query.limit : Object.keys(usersExerciseLog[req.params._id]).length;
+  let logsFrom = req.query.from ? Date.parse(req.query.from) : Date.parse('0001-01-01');
+  let logsTo = req.query.to ? Date.parse(req.query.to) : Date.parse('9999-12-31');
+  let logsResponse = [];
+
+  usersExerciseLog[req.params._id].forEach(function (entry) {
+    let entryDate = Date.parse(entry.date);
+
+    if (entryDate >= logsFrom && entryDate <= logsTo && logsResponse.length < logsLimit) {
+      logsResponse.push(entry);
+    }
+  });
+  
+  res.json({username: usersList[req.params._id], _id: parseInt(req.params._id), log: logsResponse, count: logsResponse.length});
 });
 
 
@@ -50,7 +63,7 @@ app.post('/api/users/:_id/exercises', function (req, res) {
     exDate = new Date(req.body.date).toDateString();
   }
 
-  if (req.body._id in usersExerciseLog) {
+  if (req.params._id in usersExerciseLog) {
     usersExerciseLog[req.params._id].push({date: exDate, duration: parseInt(req.body.duration), description: req.body.description});
   } else {
     usersExerciseLog[req.params._id] = [{date: exDate, duration: parseInt(req.body.duration), description: req.body.description}];
